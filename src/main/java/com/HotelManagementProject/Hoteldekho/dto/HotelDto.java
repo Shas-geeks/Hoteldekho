@@ -11,6 +11,6 @@ public class HotelDto {
     private String city;
     private List<String> photos;
     private List<String> amenities;
-    private Boolean status;
+    private Boolean   SetStaus;
     private ContactInfo contactInfo;
 }

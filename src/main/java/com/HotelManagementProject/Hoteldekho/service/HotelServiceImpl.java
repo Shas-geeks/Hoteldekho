@@ -2,8 +2,11 @@ package com.HotelManagementProject.Hoteldekho.service;
 
 import com.HotelManagementProject.Hoteldekho.dto.HotelDto;
 import com.HotelManagementProject.Hoteldekho.entity.Hotel;
+import com.HotelManagementProject.Hoteldekho.entity.Room;
 import com.HotelManagementProject.Hoteldekho.exception.ResourceNotFoundException;
 import com.HotelManagementProject.Hoteldekho.repository.HotelRepository;
+import com.HotelManagementProject.Hoteldekho.repository.RoomRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -16,6 +19,8 @@ import org.springframework.stereotype.Service;
 public class HotelServiceImpl implements HotelService {
     private final HotelRepository hotelRepository;
     private final ModelMapper modelMapper;
+    private final RoomRepository roomRepository;
+    private final InventoryService inventoryService;
     @Override
     public HotelDto CreateNewHotel( HotelDto hotelDto)
     {
@@ -50,6 +55,7 @@ public class HotelServiceImpl implements HotelService {
 
     }
     @Override
+    @Transactional
     public void DeleteHotelById(Long id)
     {
         boolean exists=hotelRepository.existsById(id);
@@ -57,6 +63,23 @@ public class HotelServiceImpl implements HotelService {
         throw new ResourceNotFoundException("Hotel Not Exists ");
         }
         hotelRepository.deleteById(id);
-
+        // Also delete the Future Inventorty
+        Room room=roomRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException(
+                "Delete the Future Hotel Inventory"
+        ));
+        inventoryService.deleteFutureInventory(room);
+    }
+    public void ActivateHotel(Long hotelId)
+    {
+        log.info("Activate The Hotel With ID :"+ hotelId);
+        Hotel hotel=hotelRepository.findById(hotelId)
+                                    .orElseThrow(()-> new ResourceNotFoundException("Hotel " +
+                                            "with This Id Not exist"));
+        hotel.setSetActive(true);
+        for(Room rooms:hotel.getRooms())
+        {
+            inventoryService.initializeRoomForYear(rooms);
+        }
+        hotelRepository.save(hotel);
     }
 }

@@ -38,9 +38,6 @@ public class Room {
     private int totalCount;
     private int capacity;
 
-
-
-
     @ManyToOne
     @JoinColumn(name = "hotel_id", nullable = false)
     private Hotel hotel;

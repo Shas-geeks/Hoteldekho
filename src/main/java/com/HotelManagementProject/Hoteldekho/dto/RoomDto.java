@@ -1,5 +1,8 @@
 package com.HotelManagementProject.Hoteldekho.dto;
 import com.HotelManagementProject.Hoteldekho.entity.Hotel;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -13,10 +16,8 @@ public class RoomDto {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private List<String> amenities;
-    private List<String>photos;
+    private List<String> photos;
     private int totalCount;
     private int capacity;
-    private Long hotel_id;   // only column id which was mapped here
-   // private HotelDto hotelDto;  =? Either Dto entity if we want to give full detail while loading
-
+    private HotelDto hotelDto;
 }
