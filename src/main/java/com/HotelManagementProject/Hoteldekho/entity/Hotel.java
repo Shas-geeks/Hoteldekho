@@ -20,10 +20,10 @@ public class Hotel {
    @Column(name = "Name",nullable = false)
    private String name;
    private String city;
-   @CollectionTable
+   @CollectionTable(name = "hotel_photos")
    @ElementCollection
    private List<String> photos;
-    @CollectionTable
+    @CollectionTable(name = "hotel_amenities")
     @ElementCollection
     private List<String> amenities;
    @CreationTimestamp
@@ -32,13 +32,14 @@ public class Hotel {
    @Column(name="updatedAt")
    @UpdateTimestamp
    private LocalDateTime updatedAt;
-    private Boolean status;
+    private Boolean SetActive;
    @OneToOne(cascade = CascadeType.ALL)
-   @JoinColumn(name="contactInfo",nullable = false)
+   @JoinColumn(name="ContactInfo",nullable = false)
     private ContactInfo contactInfo;
    @ManyToOne
     private User user;
-
+    @OneToMany(mappedBy = "hotel")
+    private List<Room> rooms;
 
 
 }

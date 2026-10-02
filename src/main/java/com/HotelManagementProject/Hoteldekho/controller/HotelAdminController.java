@@ -41,5 +41,11 @@ public class HotelAdminController {
             hotelService.DeleteHotelById(id);
             return ResponseEntity.noContent().build();
         }
+        @PatchMapping("/{hotelId}")
+        public ResponseEntity<Void>ActivateHotel(@PathVariable Long hotelId)
+        {
+            hotelService.ActivateHotel(hotelId);
+            return ResponseEntity.noContent().build();
+        }
 
 }
