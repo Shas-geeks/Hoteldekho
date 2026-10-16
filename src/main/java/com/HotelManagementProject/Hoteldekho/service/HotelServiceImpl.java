@@ -1,6 +1,8 @@
 package com.HotelManagementProject.Hoteldekho.service;
 
 import com.HotelManagementProject.Hoteldekho.dto.HotelDto;
+import com.HotelManagementProject.Hoteldekho.dto.HotelInfoDto;
+import com.HotelManagementProject.Hoteldekho.dto.RoomDto;
 import com.HotelManagementProject.Hoteldekho.entity.Hotel;
 import com.HotelManagementProject.Hoteldekho.entity.Room;
 import com.HotelManagementProject.Hoteldekho.exception.ResourceNotFoundException;
@@ -12,6 +14,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -58,17 +62,20 @@ public class HotelServiceImpl implements HotelService {
     @Transactional
     public void DeleteHotelById(Long id)
     {
-        boolean exists=hotelRepository.existsById(id);
-        if(!exists){
-        throw new ResourceNotFoundException("Hotel Not Exists ");
-        }
-        hotelRepository.deleteById(id);
+        Hotel hotel=hotelRepository.findById(id).
+                orElseThrow(() -> new ResourceNotFoundException("Hotel Not Exists"));
         // Also delete the Future Inventorty
-        Room room=roomRepository.findById(id).orElseThrow(()-> new ResourceNotFoundException(
-                "Delete the Future Hotel Inventory"
-        ));
-        inventoryService.deleteFutureInventory(room);
+        // Loop through all rooms belonging to this hotel and delete their future inventory
+        for (Room room : hotel.getRooms()) {
+            inventoryService.deleteAllInventories(room);
+            roomRepository.deleteById(room.getId());
+        }
+        // Loop through all rooms belonging to this hotel and delete their future inventory
+      //
+        hotelRepository.deleteById(id);
     }
+    @Override
+    @Transactional
     public void ActivateHotel(Long hotelId)
     {
         log.info("Activate The Hotel With ID :"+ hotelId);
@@ -81,5 +88,15 @@ public class HotelServiceImpl implements HotelService {
             inventoryService.initializeRoomForYear(rooms);
         }
         hotelRepository.save(hotel);
+    }
+
+    @Override
+    public HotelInfoDto getHotelInfo(Long hotelId) {
+        Hotel hotel=hotelRepository.findById(hotelId).
+                orElseThrow(() -> new ResourceNotFoundException("Hotel Not Exists"));
+        List<RoomDto>rooms=hotel.getRooms().stream().map((element)->
+                modelMapper.map(element,RoomDto.class)).toList();
+
+        return new HotelInfoDto(modelMapper.map(hotel,HotelDto.class),rooms);
     }
 }
