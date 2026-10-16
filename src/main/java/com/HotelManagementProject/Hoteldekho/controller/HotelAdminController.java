@@ -35,7 +35,7 @@ public class HotelAdminController {
             HotelDto UpdateById=hotelService.UpdateHotelById(id,hotelDto);
             return new ResponseEntity<>(UpdateById,HttpStatus.OK);
         }
-        @DeleteMapping("deleteHotelById/{id}")
+        @DeleteMapping("/deleteHotelById/{id}")
         public ResponseEntity<Void>DeleteHotelById(@PathVariable Long id)
         {
             hotelService.DeleteHotelById(id);

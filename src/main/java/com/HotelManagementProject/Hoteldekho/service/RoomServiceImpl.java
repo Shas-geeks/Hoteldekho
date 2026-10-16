@@ -5,6 +5,7 @@ import com.HotelManagementProject.Hoteldekho.entity.Hotel;
 import com.HotelManagementProject.Hoteldekho.entity.Room;
 import com.HotelManagementProject.Hoteldekho.exception.ResourceNotFoundException;
 import com.HotelManagementProject.Hoteldekho.repository.HotelRepository;
+import com.HotelManagementProject.Hoteldekho.repository.InventoryRepository;
 import com.HotelManagementProject.Hoteldekho.repository.RoomRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +26,7 @@ public class RoomServiceImpl implements RoomService {
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
     private final InventoryService inventoryService;
+    private final InventoryRepository inventoryRepository;
 
     @Override
     public RoomDto CreateRooms(Long hotelId, RoomDto roomDto) {
@@ -36,10 +38,9 @@ public class RoomServiceImpl implements RoomService {
         // Now attach this hotel id to the room
         createRoom.setHotel(hotel);
         createRoom=roomRepository.save(createRoom);
-        if(!hotel.getSetActive())
-        {
+     // IF  the  room is activated then create a ivemtory  for  a  new room
             inventoryService.initializeRoomForYear(createRoom);
-        }
+
         return modelMapper.map(createRoom,RoomDto.class);
     }
 
@@ -88,6 +89,6 @@ public class RoomServiceImpl implements RoomService {
         roomRepository.deleteById(roomId);
         Room room=roomRepository.findById(roomId).orElseThrow(()-> new ResourceNotFoundException("Id " +
                 "Not Exists "));
-        inventoryService.deleteFutureInventory(room);
+        inventoryRepository.deleteByRoom(room);
     }
 }
